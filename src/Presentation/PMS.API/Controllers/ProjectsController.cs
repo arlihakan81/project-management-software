@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PMS.Application.DTO.Project;
+using PMS.Application.Interfaces;
 using PMS.Domain.Entities;
 
 namespace PMS.API.Controllers
@@ -8,25 +10,66 @@ namespace PMS.API.Controllers
     [Route("api/v1/[controller]")]
     [ApiController]
     [Authorize]
-    public class ProjectsController : ControllerBase
+    public class ProjectsController(IProjectService projectService) : ControllerBase
     {
-        private readonly List<Project> _projects = new List<Project>()
-        {
-            new () { Name = "Project Alpha", Description = "First project", StartDate = DateTime.Now, Status = Domain.Enums.ProjectStatus.Inactive },
-            new () { Name = "Project Beta", Description = "Second project", StartDate = DateTime.Now, Status = Domain.Enums.ProjectStatus.OnGoing },
-            new () { Name = "Project Teta", Description = "Third project", StartDate = DateTime.Now, Status = Domain.Enums.ProjectStatus.Cancelled },
-            new () { Name = "Project Seta", Description = "Fourth project", StartDate = DateTime.Now, Status = Domain.Enums.ProjectStatus.Inactive },
-            new () { Name = "Project Jeta", Description = "Fifth project", StartDate = DateTime.Now, Status = Domain.Enums.ProjectStatus.Inactive },
-            new () { Name = "Project Goethe", Description = "Sixth project", StartDate = DateTime.Now, Status = Domain.Enums.ProjectStatus.Cancelled },
-            new () { Name = "Project Panathinaikos", Description = "Seventh project", StartDate = DateTime.Now, Status = Domain.Enums.ProjectStatus.OnGoing},
-        };
-
+        private readonly IProjectService _projectService = projectService;
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int offset = 10, [FromQuery] int limit = 10, [FromQuery] string? filter = null)
         {
-            return Ok(_projects);
+            var projects = await _projectService.GetAllProjectsAsync(page, offset, limit, filter != null ? p => p.Name.Contains(filter) : null);
+            return Ok(projects);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(Guid id)
+        {
+            var project = await _projectService.GetProjectByIdAsync(id);
+            if (project == null)
+            {
+                return NotFound();
+            }
+            return Ok(project);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] CreateProjectDto createProjectDto)
+        {
+            await _projectService.AddAsync(createProjectDto);
+            return CreatedAtAction(nameof(Get), new {title = createProjectDto.Name});
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(Guid id, [FromBody] UpdateProjectDto updateProjectDto)
+        {
+            try
+            {
+                await _projectService.UpdateAsync(id, updateProjectDto);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            try
+            {
+                await _projectService.DeleteAsync(id);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+
+
+
 
 
 

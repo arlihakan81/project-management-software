@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using PMS.Application.Interfaces;
 using PMS.Persistence.Services;
 using PMS.Persistence.Data;
+using PMS.Application.Repositories.Generic;
+using PMS.Persistence.Repositories.Generic;
+using PMS.Application.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,12 +73,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         }
     );
 
+builder.Services.AddAutoMapper(typeof(MapProfile));
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
-
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IProjectService, ProjectService>();
 
 var app = builder.Build();
 

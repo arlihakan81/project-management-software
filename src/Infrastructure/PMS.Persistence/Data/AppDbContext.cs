@@ -71,6 +71,7 @@ namespace PMS.Persistence.Data
                         entry.Property("CreatedById").IsModified = false;
                         entry.Property("CreatedAt").IsModified = false;
                         baseEntity.UpdatedById = organizationService.GetAuthenticatedUserId();
+                        baseEntity.UpdatedAt = DateTime.Now;
                     }
                 }
             }
