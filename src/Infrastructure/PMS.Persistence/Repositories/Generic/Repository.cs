@@ -10,7 +10,7 @@ namespace PMS.Persistence.Repositories.Generic
     {
         private readonly AppDbContext _context = context;
 
-        public async Task AddAsync(T entity)
+        public virtual async Task AddAsync(T entity)
         {
             _context.Set<T>().Add(entity);
             await _context.SaveChangesAsync();
@@ -24,7 +24,7 @@ namespace PMS.Persistence.Repositories.Generic
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<T>?> GetAllAsync(int page = 1, int offset = 1, int limit = 10, Expression<Func<T, bool>>? expression = null)
+        public virtual async Task<IEnumerable<T>?> GetAllAsync(int page = 1, int offset = 1, int limit = 10, Expression<Func<T, bool>>? expression = null)
         {
             return await _context.Set<T>()
                 .Where(expression ?? (x => true))
@@ -33,12 +33,12 @@ namespace PMS.Persistence.Repositories.Generic
                 .ToListAsync();
         }
 
-        public async Task<T?> GetAsync(Expression<Func<T, bool>> expression)
+        public virtual async Task<T?> GetAsync(Expression<Func<T, bool>> expression)
         {
             return await _context.Set<T>().FirstOrDefaultAsync(expression);
         }
 
-        public async Task<T?> GetByIdAsync(Guid id)
+        public virtual async Task<T?> GetByIdAsync(Guid id)
         {
             return await _context.Set<T>().FindAsync(id);
         }

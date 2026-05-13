@@ -1,4 +1,5 @@
-﻿using PMS.Application.DTO.User;
+﻿using PMS.Application.DTO.Board;
+using PMS.Application.DTO.User;
 using PMS.Domain.Enums;
 
 namespace PMS.Application.DTO.Project
@@ -15,6 +16,8 @@ namespace PMS.Application.DTO.Project
         public DateTime? LastUpdatedDate { get; set; }
 
         public virtual UserDto? Manager { get; set; }
+        public virtual ICollection<BoardDto> Boards { get; set; } = [];
+
 
     }
 }

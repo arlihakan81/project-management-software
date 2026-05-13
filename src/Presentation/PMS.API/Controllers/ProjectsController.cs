@@ -10,9 +10,10 @@ namespace PMS.API.Controllers
     [Route("api/v1/[controller]")]
     [ApiController]
     [Authorize]
-    public class ProjectsController(IProjectService projectService) : ControllerBase
+    public class ProjectsController(IProjectService projectService, IIssueService issueService) : ControllerBase
     {
         private readonly IProjectService _projectService = projectService;
+        private readonly IIssueService _issueService = issueService;
 
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] int page = 1, [FromQuery] int offset = 10, [FromQuery] int limit = 10, [FromQuery] string? filter = null)
@@ -32,11 +33,21 @@ namespace PMS.API.Controllers
             return Ok(project);
         }
 
+        [HttpGet("{id}/issues")]
+        public async Task<IActionResult> GetIssues(Guid id) => Ok(await _issueService.GetIssuesByProjectIdAsync(id));
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateProjectDto createProjectDto)
         {
-            await _projectService.AddAsync(createProjectDto);
-            return CreatedAtAction(nameof(Get), new {title = createProjectDto.Name});
+            try
+            {
+                await _projectService.AddAsync(createProjectDto);
+                return CreatedAtAction(nameof(Get), new { title = createProjectDto.Name });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]

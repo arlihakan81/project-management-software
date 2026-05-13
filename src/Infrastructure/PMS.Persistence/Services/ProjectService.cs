@@ -1,20 +1,25 @@
 ﻿using AutoMapper;
 using PMS.Application.DTO.Project;
 using PMS.Application.Interfaces;
+using PMS.Application.Repositories;
 using PMS.Application.Repositories.Generic;
 using PMS.Domain.Entities;
 using System.Linq.Expressions;
 
 namespace PMS.Persistence.Services
 {
-    public class ProjectService(IRepository<Project> repository, IMapper mapper) : IProjectService
+    public class ProjectService(IProjectRepository repository, IMapper mapper) : IProjectService
     {
-        private readonly IRepository<Project> _repository = repository;
+        private readonly IProjectRepository _repository = repository;
         private readonly IMapper _mapper = mapper;
 
         public async Task AddAsync(CreateProjectDto createProjectDto)
         {
             var project = _mapper.Map<Project>(createProjectDto);
+            if(!await _repository.IsProjectTitleUniqueAsync(createProjectDto.Name))
+            {
+                throw new Exception($"{createProjectDto.Name} başlığa sahip bir proje bulunuyor");
+            }
             await _repository.AddAsync(project);
         }
 
@@ -40,6 +45,10 @@ namespace PMS.Persistence.Services
             if (project == null)
             {
                 throw new Exception($"Project with id {id} not found");
+            }
+            if(!await _repository.IsProjectTitleUniqueAsync(updateProjectDto.Name, id))
+            {
+                throw new Exception($"{updateProjectDto.Name} başlığa sahip bir başka proje bulunuyor");
             }
             await _repository.UpdateAsync(_mapper.Map(updateProjectDto, project));
         }

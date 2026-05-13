@@ -8,6 +8,8 @@ using PMS.Persistence.Data;
 using PMS.Application.Repositories.Generic;
 using PMS.Persistence.Repositories.Generic;
 using PMS.Application.Mapping;
+using PMS.Application.Repositories;
+using PMS.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,7 +82,11 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<IProjectService, ProjectService>();
+
+builder.Services.AddScoped<IIssueRepository, IssueRepository>();
+builder.Services.AddScoped<IIssueService, IssueService>();
 
 var app = builder.Build();
 
